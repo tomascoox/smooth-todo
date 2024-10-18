@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';  // Updated import
 import clientPromise from '@/lib/mongodb';
 
 if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
