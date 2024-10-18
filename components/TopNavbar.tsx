@@ -15,8 +15,6 @@ export function TopNavbar() {
     }
   }, [session]);
 
-  console.log('TopNavbar session:', session);
-
   return (
     <nav className="bg-white border-b border-gray-200 p-4">
       <div className="flex items-center justify-between">

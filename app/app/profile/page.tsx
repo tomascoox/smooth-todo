@@ -5,7 +5,10 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import Image from 'next/image';
+import { Camera } from 'lucide-react';
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
@@ -19,7 +22,6 @@ export default function ProfilePage() {
     if (status === 'unauthenticated') {
       router.push('/login');
     } else if (session?.user) {
-      console.log('Session user:', session.user);
       setName(session.user.name || '');
       setEmail(session.user.email || '');
       setAvatar(session.user.image || '/images/default-avatar.png');
@@ -37,14 +39,12 @@ export default function ProfilePage() {
       });
       if (response.ok) {
         await update({ name: name });
-        // Add this line to force a session refresh
         await fetch('/api/auth/session');
         alert('Profile updated successfully!');
       } else {
         throw new Error('Failed to update profile');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
       alert('Failed to update profile');
     } finally {
       setIsLoading(false);
@@ -58,21 +58,17 @@ export default function ProfilePage() {
       formData.append('file', file);
 
       try {
-        console.log('Uploading file:', file.name);
         const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
         const data = await response.json();
-        console.log('Upload response:', data);
         if (data.url) {
           setAvatar(data.url);
-          await update({ image: data.url });  // Update the session
-          // Add this line to force a session refresh
+          await update({ image: data.url });
           await fetch('/api/auth/session');
         }
       } catch (error) {
-        console.error('Error uploading avatar:', error);
         alert('Failed to upload avatar');
       }
     }
@@ -83,51 +79,65 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">User Profile</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex flex-col items-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
-            <Image
-              src={avatar}
-              alt="User Avatar"
-              width={96}
-              height={96}
-              className="object-cover w-full h-full"
+    <Card className="max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">User Profile</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex flex-col items-center">
+            <div className="w-32 h-32 rounded-full overflow-hidden mb-4 relative group">
+              <Image
+                src={avatar}
+                alt="User Avatar"
+                width={128}
+                height={128}
+                className="object-cover w-full h-full"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Label htmlFor="avatar-upload" className="cursor-pointer">
+                  <Camera className="w-8 h-8 text-white" />
+                </Label>
+                <Input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full"
             />
           </div>
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="mt-2"
-          />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="name">Name</label>
-          <Input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="email">Email</label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled
-          />
-        </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled
+              className="w-full bg-gray-100"
+            />
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Button type="submit" className="w-full" disabled={isLoading} onClick={handleSubmit}>
           {isLoading ? 'Updating...' : 'Update Profile'}
         </Button>
-      </form>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

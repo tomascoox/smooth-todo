@@ -27,11 +27,8 @@ export async function POST(request: Request) {
     const file = formData.get('file') as File;
 
     if (!file) {
-      console.error('No file uploaded');
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
-
-    console.log('File received:', file.name);
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -41,11 +38,8 @@ export async function POST(request: Request) {
         { folder: 'user_avatars' },
         async (error, result) => {
           if (error) {
-            console.error('Error uploading to Cloudinary:', error);
             reject(NextResponse.json({ error: 'Upload failed' }, { status: 500 }));
           } else {
-            console.log('Cloudinary upload successful:', result?.secure_url);
-            
             // Update user's image in the database
             const client = await clientPromise;
             const usersCollection = client.db().collection('users');
@@ -54,15 +48,12 @@ export async function POST(request: Request) {
               { $set: { image: result?.secure_url } }
             );
 
-            console.log('User image updated in database');
-
             resolve(NextResponse.json({ url: result?.secure_url }));
           }
         }
       ).end(buffer);
     });
   } catch (error) {
-    console.error('Error processing upload:', error);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
   }
 }
