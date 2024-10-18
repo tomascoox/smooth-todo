@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Home, ListTodo, User, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 const navItems = [
   { icon: Home, label: 'Home', href: '/app' },
@@ -14,12 +14,14 @@ const navItems = [
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
+  const { data: session } = useSession();
 
-  const handleLogout = async () => {
-    await signOut({ redirect: false });
-    router.push('/login');
+  const handleLogout = () => {
+    signOut({ callbackUrl: '/' });
   };
+
+  // Hide the Navbar on the landing page, login page, and register page
+  if (pathname === '/' || pathname === '/login' || pathname === '/register') return null;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">

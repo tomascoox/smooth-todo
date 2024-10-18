@@ -4,6 +4,8 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from 'react-hot-toast';
 import ClientProvider from "@/components/ClientProvider";
+import { AuthCheck } from "@/components/AuthCheck";
+import { Navbar } from "@/components/Navbar";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -28,10 +30,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
         <AuthProvider>
           <ClientProvider>
-            {children}
+            <AuthCheck />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Navbar />
             <Toaster position="top-right" />
           </ClientProvider>
         </AuthProvider>

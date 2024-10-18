@@ -4,18 +4,26 @@ import { useUser } from '@/contexts/UserContext';
 import { Menu } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export function TopNavbar() {
   const { user } = useUser();
   const [avatarUrl, setAvatarUrl] = useState('/images/default-avatar.png');
-  const [userName, setUserName] = useState('User');
+  const [userName, setUserName] = useState('Guest');
+  const pathname = usePathname();
 
   useEffect(() => {
     if (user) {
       setAvatarUrl(user.image || '/images/default-avatar.png');
       setUserName(user.name || user.email || 'User');
+    } else {
+      setAvatarUrl('/images/default-avatar.png');
+      setUserName('Guest');
     }
   }, [user]);
+
+  // Hide the TopNavbar on the landing page, login page, and register page
+  if (pathname === '/' || pathname === '/login' || pathname === '/register') return null;
 
   return (
     <nav className="bg-white border-b border-gray-200 p-4">

@@ -4,8 +4,8 @@ import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-50">
-      <div className="flex flex-col items-center space-y-8 -mt-20">
+    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      <div className="flex flex-col items-center space-y-8">
         <div>
           <Image src="/images/logo-smooth-todo.svg" alt="Smooth Todo Logo" width={200} height={200} priority />
         </div>

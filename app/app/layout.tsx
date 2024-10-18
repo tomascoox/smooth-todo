@@ -12,7 +12,6 @@ export default function AppLayout({
       <main className="flex-grow p-4 mt-16 mb-16">
         {children}
       </main>
-      <Navbar />
     </div>
   );
 }
