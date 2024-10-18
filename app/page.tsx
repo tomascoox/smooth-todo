@@ -1,16 +1,22 @@
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import Image from 'next/image';
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-4xl font-bold mb-8">Welcome to Smooth Todo</h1>
-      <div className="flex space-x-4">
-        <Link href="/login" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Login
-        </Link>
-        <Link href="/register" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-          Register
-        </Link>
+    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-50">
+      <div className="flex flex-col items-center space-y-8 -mt-20">
+        <div>
+          <Image src="/images/logo-smooth-todo.svg" alt="Smooth Todo Logo" width={200} height={200} priority />
+        </div>
+        <div className="flex flex-col space-y-4 w-full max-w-xs">
+          <Button asChild variant="default">
+            <Link href="/login">Login</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/register">Register</Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
