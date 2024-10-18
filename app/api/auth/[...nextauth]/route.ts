@@ -1,14 +1,65 @@
-import NextAuth, { DefaultSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import NextAuth, { AuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from "bcryptjs";
+import clientPromise from "@/lib/mongodb";
 
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      image?: string | null;
-    } & DefaultSession["user"]
+export const authOptions: AuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        const client = await clientPromise;
+        const usersCollection = client.db().collection("users");
+        const user = await usersCollection.findOne({ email: credentials.email });
+
+        if (!user || !user.password) {
+          return null;
+        }
+
+        const isPasswordValid = await compare(credentials.password, user.password);
+
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
+      }
+    })
+  ],
+  session: {
+    strategy: "jwt"
+  },
+  pages: {
+    signIn: "/login",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    }
   }
-}
+};
 
 const handler = NextAuth(authOptions);
 

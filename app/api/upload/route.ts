@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import clientPromise from '@/lib/mongodb';
 
 if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
@@ -33,22 +33,26 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    return new Promise((resolve, reject) => {
+    return new Promise<Response>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         { folder: 'user_avatars' },
         async (error, result) => {
           if (error) {
-            reject(NextResponse.json({ error: 'Upload failed' }, { status: 500 }));
+            resolve(NextResponse.json({ error: 'Upload failed' }, { status: 500 }));
           } else {
-            // Update user's image in the database
-            const client = await clientPromise;
-            const usersCollection = client.db().collection('users');
-            await usersCollection.updateOne(
-              { email: session.user.email },
-              { $set: { image: result?.secure_url } }
-            );
+            try {
+              const client = await clientPromise;
+              const usersCollection = client.db().collection('users');
+              await usersCollection.updateOne(
+                { email: session.user.email },
+                { $set: { image: result?.secure_url } }
+              );
 
-            resolve(NextResponse.json({ url: result?.secure_url }));
+              resolve(NextResponse.json({ url: result?.secure_url }));
+            } catch (dbError) {
+              console.error('Database update error:', dbError);
+              resolve(NextResponse.json({ error: 'Failed to update user image' }, { status: 500 }));
+            }
           }
         }
       ).end(buffer);
