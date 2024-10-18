@@ -37,17 +37,13 @@ export const authOptions: AuthOptions = {
             throw new Error("Invalid password");
           }
 
-          if (credentials.email === "tomas@joox.se") {
-            console.log("Attempting login for tomas@joox.se");
-            console.log("Entered password:", credentials.password);
-            console.log("Stored hash:", user.password);
-          }
-
+          // Return the full user object (excluding the password)
           return {
             id: user._id.toString(),
             email: user.email,
             name: user.name,
             image: user.image,
+            // Add any other fields you want to include in the session
           };
         } catch (error) {
           console.error("Error in authorize function:", error);
@@ -66,13 +62,22 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.image = user.image;
+        // Add any other fields you want to include
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.image as string;
+        // Add any other fields you want to include
       }
+      console.log("Session data:", session);
       return session;
     }
   }

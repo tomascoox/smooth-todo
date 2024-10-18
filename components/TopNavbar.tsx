@@ -1,19 +1,21 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useUser } from '@/contexts/UserContext';
 import { Menu } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export function TopNavbar() {
-  const { data: session } = useSession();
+  const { user } = useUser();
   const [avatarUrl, setAvatarUrl] = useState('/images/default-avatar.png');
+  const [userName, setUserName] = useState('User');
 
   useEffect(() => {
-    if (session?.user?.image) {
-      setAvatarUrl(session.user.image);
+    if (user) {
+      setAvatarUrl(user.image || '/images/default-avatar.png');
+      setUserName(user.name || user.email || 'User');
     }
-  }, [session]);
+  }, [user]);
 
   return (
     <nav className="bg-white border-b border-gray-200 p-4">
@@ -29,7 +31,7 @@ export function TopNavbar() {
               priority
             />
           </div>
-          <span className="font-semibold text-lg ml-2">Hello {session?.user?.name || 'User'}</span>
+          <span className="font-semibold text-lg ml-2">Hello {userName}</span>
         </div>
         <button className="p-2">
           <Menu className="h-6 w-6" />
