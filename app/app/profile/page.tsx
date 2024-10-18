@@ -45,6 +45,7 @@ export default function ProfilePage() {
         throw new Error('Failed to update profile');
       }
     } catch (error) {
+      console.error('Profile update error:', error);
       alert('Failed to update profile');
     } finally {
       setIsLoading(false);
@@ -69,6 +70,7 @@ export default function ProfilePage() {
           await fetch('/api/auth/session');
         }
       } catch (error) {
+        console.error('Avatar upload error:', error);
         alert('Failed to upload avatar');
       }
     }
