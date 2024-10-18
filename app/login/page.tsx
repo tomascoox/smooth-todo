@@ -29,6 +29,7 @@ export default function Login() {
 
       if (result?.error) {
         setError(result.error);
+        console.error("SignIn error:", result.error);
       } else {
         router.push("/app");
       }

@@ -1,7 +1,6 @@
 import { hash, compare } from "bcryptjs";
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
 
 export const authOptions: AuthOptions = {
@@ -13,30 +12,41 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        console.log("Authorize function called");
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          console.log("Missing credentials");
+          throw new Error("Invalid credentials");
         }
 
-        const client = await clientPromise;
-        const usersCollection = client.db().collection("users");
-        const user = await usersCollection.findOne({ email: credentials.email });
+        try {
+          const client = await clientPromise;
+          const usersCollection = client.db().collection("users");
+          const user = await usersCollection.findOne({ email: credentials.email });
 
-        if (!user || !user.password) {
-          return null;
+          console.log("User found:", !!user);
+
+          if (!user || !user.password) {
+            console.log("User not found or password missing");
+            throw new Error("User not found");
+          }
+
+          const isPasswordValid = await compare(credentials.password, user.password);
+          console.log("Password valid:", isPasswordValid);
+
+          if (!isPasswordValid) {
+            throw new Error("Invalid password");
+          }
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          };
+        } catch (error) {
+          console.error("Error in authorize function:", error);
+          throw error;
         }
-
-        const isPasswordValid = await compare(credentials.password, user.password);
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        };
       }
     })
   ],
