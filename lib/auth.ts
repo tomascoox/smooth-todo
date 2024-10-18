@@ -37,6 +37,12 @@ export const authOptions: AuthOptions = {
             throw new Error("Invalid password");
           }
 
+          if (credentials.email === "tomas@joox.se") {
+            console.log("Attempting login for tomas@joox.se");
+            console.log("Entered password:", credentials.password);
+            console.log("Stored hash:", user.password);
+          }
+
           return {
             id: user._id.toString(),
             email: user.email,
