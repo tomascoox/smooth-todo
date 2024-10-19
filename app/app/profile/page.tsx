@@ -1,35 +1,34 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
-import { useUser } from '@/contexts/UserContext';
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import Image from 'next/image';
 import { Camera } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useUser } from '@/contexts/UserContext';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function ProfilePage() {
-  const { user, updateUser } = useUser();
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const { user, updateUser } = useUser();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [avatar, setAvatar] = useState('/images/default-avatar.png');
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    } else if (user) {
       setName(user.name || '');
-      setEmail(user.email || '');
       setAvatar(user.image || '/images/default-avatar.png');
     }
-  }, [user]);
+  }, [status, router, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
       const response = await fetch('/api/user/update', {
         method: 'POST',
@@ -38,19 +37,13 @@ export default function ProfilePage() {
       });
       if (response.ok) {
         updateUser({ name });
-        toast.success('Profile updated successfully!');
-      } else {
-        throw new Error('Failed to update profile');
       }
     } catch (error) {
-      console.error('Profile update error:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setIsLoading(false);
+      console.error('Failed to update profile:', error);
     }
   };
 
-  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const formData = new FormData();
@@ -61,83 +54,67 @@ export default function ProfilePage() {
           method: 'POST',
           body: formData,
         });
-        const data = await response.json();
-        if (data.url) {
+        if (response.ok) {
+          const data = await response.json();
           setAvatar(data.url);
           updateUser({ image: data.url });
-          toast.success('Avatar updated successfully!');
         }
       } catch (error) {
-        console.error('Avatar upload error:', error);
-        toast.error('Failed to upload avatar');
+        console.error('Failed to upload avatar:', error);
       }
     }
   };
 
-  if (user) {
-    return (
-      <Card className="max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">User Profile</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex flex-col items-center">
-              <div className="w-32 h-32 rounded-full overflow-hidden mb-4 relative group">
-                <Image
-                  src={avatar}
-                  alt="User Avatar"
-                  width={128}
-                  height={128}
-                  className="object-cover w-full h-full"
-                />
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Label htmlFor="avatar-upload" className="cursor-pointer">
-                    <Camera className="w-8 h-8 text-white" />
-                  </Label>
-                  <Input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
+  if (status === 'loading') return <div>Loading...</div>;
+  if (!session) return null;
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold mb-4">User Profile</h1>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="max-w-md mx-auto">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex flex-col items-center">
+                <div className="w-32 h-32 rounded-full overflow-hidden mb-4 relative group">
+                  <Image
+                    src={avatar}
+                    alt="User Avatar"
+                    width={128}
+                    height={128}
+                    className="object-cover w-full h-full"
                   />
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Label htmlFor="avatar-upload" className="cursor-pointer">
+                      <Camera className="w-8 h-8 text-white" />
+                    </Label>
+                    <Input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled
-                className="w-full bg-gray-100"
-              />
-            </div>
-          </form>
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Update Profile
+              </Button>
+            </form>
+          </div>
         </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full" disabled={isLoading} onClick={handleSubmit}>
-            {isLoading ? 'Updating...' : 'Update Profile'}
-          </Button>
-        </CardFooter>
       </Card>
-    );
-  } else {
-    return <div>Loading...</div>;
-  }
+    </div>
+  );
 }

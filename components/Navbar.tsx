@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ListTodo, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, ListTodo, User, Users, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { signOut, useSession } from 'next-auth/react';
 
 const navItems = [
-  { icon: Home, label: 'Home', href: '/app' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/app' },
   { icon: ListTodo, label: 'Tasks', href: '/app/tasks' },
+  { icon: Users, label: 'Workgroups', href: '/app/workgroups' },
   { icon: User, label: 'Profile', href: '/app/profile' },
 ];
 
@@ -20,7 +21,6 @@ export function Navbar() {
     signOut({ callbackUrl: '/' });
   };
 
-  // Hide the Navbar on the landing page, login page, and register page
   if (pathname === '/' || pathname === '/login' || pathname === '/register') return null;
 
   return (

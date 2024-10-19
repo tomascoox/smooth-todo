@@ -23,7 +23,7 @@ export default function TasksPage() {
   }
 
   return (
-    <div>
+    <div className="container mx-auto px-4 pt-4">
       <h1 className="text-2xl font-bold mb-4">Tasks</h1>
       {/* Add task list components here */}
     </div>

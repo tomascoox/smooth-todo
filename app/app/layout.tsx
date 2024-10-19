@@ -1,5 +1,4 @@
 import { TopNavbar } from '@/components/TopNavbar';
-import { Navbar } from '@/components/Navbar';
 
 export default function AppLayout({
   children,
@@ -7,11 +6,11 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       <TopNavbar />
-      <main className="flex-grow p-4 mt-16 mb-16">
+      <main className="flex-grow pt-4 px-4">
         {children}
       </main>
-    </div>
+    </>
   );
 }
