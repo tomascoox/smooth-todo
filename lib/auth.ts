@@ -1,6 +1,6 @@
-import { hash, compare } from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { compare, hash } from "bcryptjs";
 import clientPromise from "@/lib/mongodb";
 
 export const authOptions: NextAuthOptions = {
@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const client = await clientPromise;
-          const db = client.db("tiku-todo");
+          const db = client.db();
           const usersCollection = db.collection("users");
           
           const user = await usersCollection.findOne({ email: credentials.email });
