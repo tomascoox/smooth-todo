@@ -80,13 +80,6 @@ export async function POST(req: Request) {
             userId: session.user.id,
         }
 
-        console.log('Data before insertion:', {
-            name,
-            project,
-            creationDate: newTodo.creationDate,
-            deadlineDate: newTodo.deadlineDate,
-            userId: newTodo.userId,
-        })
 
         const result = await client
             .db()
