@@ -30,7 +30,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Workgroup not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ workgroupName: workgroup.name });
+    // Check if the invited email already has an account
+    const existingUser = await db.collection('users').findOne({
+      email: invitation.invitedEmail
+    });
+
+    return NextResponse.json({ 
+      workgroupName: workgroup.name,
+      hasAccount: !!existingUser,
+      invitedEmail: invitation.invitedEmail
+    });
   } catch (error) {
     console.error('Error checking invitation:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

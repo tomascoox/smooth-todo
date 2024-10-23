@@ -1,34 +1,69 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
 
-export default function Register() {
+export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const invitationId = searchParams.get('invitationId');
+  const invitedEmail = searchParams.get('email');
+
+  // Set the email from the invitation if available
+  useEffect(() => {
+    if (invitedEmail) {
+      setEmail(invitedEmail);
+    }
+  }, [invitedEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
 
-    if (response.ok) {
-      router.push("/login");
-    } else {
-      const data = await response.json();
-      setError(data.error || "Registration failed");
+    try {
+      // First register the user
+      const registerResponse = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!registerResponse.ok) {
+        const data = await registerResponse.json();
+        throw new Error(data.error || "Registration failed");
+      }
+
+      // Then attempt to sign in
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
+      });
+
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      // If we have an invitation, redirect to the accept invite page
+      if (invitationId) {
+        router.push(`/workgroups/accept-invite?id=${invitationId}`);
+      } else {
+        router.push('/app');
+      }
+    } catch (err: any) {
+      setError(err.message);
       setIsLoading(false);
     }
   };
@@ -51,6 +86,7 @@ export default function Register() {
                 placeholder="Email"
                 required
                 autoComplete="email"
+                disabled={!!invitedEmail} // Disable if we have an invited email
               />
               <Input
                 type="password"
@@ -68,7 +104,10 @@ export default function Register() {
             </Button>
             <p className="text-sm text-center">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-500 hover:underline">
+              <Link 
+                href={invitationId ? `/login?redirect=/workgroups/accept-invite?id=${invitationId}` : "/login"} 
+                className="text-blue-500 hover:underline"
+              >
                 Login here
               </Link>
             </p>

@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
     // Find the invitation
     const invitation = await db.collection('invitations').findOne({
       _id: new ObjectId(invitationId),
-      status: 'pending'
+      status: 'pending',
+      invitedEmail: session.user.email  // Make sure the logged-in user matches the invited email
     });
 
     if (!invitation) {
@@ -34,30 +35,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invitation not found or already processed' }, { status: 404 });
     }
 
-    // Update the invitation status
-    await db.collection('invitations').updateOne(
-      { _id: new ObjectId(invitationId) },
-      { $set: { status: 'accepted' } }
-    );
+    // Delete the invitation first
+    await db.collection('invitations').deleteOne({
+      _id: new ObjectId(invitationId)
+    });
 
     console.log('Updating workgroup');
-    const workgroup = await db.collection('workgroups').findOne({ _id: invitation.workgroupId });
-
-    if (!workgroup) {
-      console.log('Workgroup not found');
-      return NextResponse.json({ error: 'Workgroup not found' }, { status: 404 });
-    }
-
-    const updatedMembers = Array.from(new Set([...workgroup.members, session.user.email]));
-    const updatedInvitedMembers = workgroup.invitedMembers.filter((email: string) => email !== session.user.email);
-
+    
+    // Update the workgroup membership
     const updateResult = await db.collection('workgroups').updateOne(
       { _id: invitation.workgroupId },
       { 
-        $set: { 
-          members: updatedMembers,
-          invitedMembers: updatedInvitedMembers
-        }
+        $addToSet: { members: session.user.email },
+        $pull: { invitedMembers: invitation.invitedEmail }  // Use the value directly, not an object
       }
     );
 
@@ -66,6 +56,11 @@ export async function POST(req: NextRequest) {
     if (updateResult.matchedCount === 0) {
       console.log('Workgroup not found');
       return NextResponse.json({ error: 'Workgroup not found' }, { status: 404 });
+    }
+
+    if (updateResult.modifiedCount === 0) {
+      console.log('No changes made to workgroup');
+      return NextResponse.json({ error: 'No changes made to workgroup' }, { status: 400 });
     }
 
     console.log('Workgroup updated successfully');

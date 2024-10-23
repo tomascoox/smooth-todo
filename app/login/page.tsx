@@ -1,52 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { signIn } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import Link from "next/link";
-import toast from 'react-hot-toast';
 
-export default function Login() {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const { update } = useSession();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const redirect = searchParams.get('redirect');
+  const invitedEmail = searchParams.get('email');
+
+  // Pre-fill email if provided
+  useEffect(() => {
+    if (invitedEmail) {
+      setEmail(invitedEmail);
+    }
+  }, [invitedEmail]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        redirect: false,
+      const result = await signIn('credentials', {
         email,
         password,
+        redirect: false,
       });
 
       if (result?.error) {
-        toast.error(result.error);
-        console.error("SignIn error:", result.error);
-      } else {
-        await update(); // Force session update
-        toast.success("Logged in successfully!");
-        router.push("/app");
+        setError("Invalid email or password");
+        setIsLoading(false);
+        return;
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error("An unexpected error occurred. Please try again.");
-    } finally {
+
+      // If we have a redirect URL, use it, otherwise go to /app
+      if (redirect) {
+        router.push(redirect);
+      } else {
+        router.push('/app');
+      }
+    } catch (error) {
+      setError("An error occurred during login");
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <Card className="w-[350px]">
         <CardHeader>
           <CardTitle>Login</CardTitle>
@@ -63,6 +74,7 @@ export default function Login() {
                 placeholder="Email"
                 required
                 autoComplete="email"
+                disabled={!!invitedEmail}
               />
               <Input
                 type="password"
@@ -80,7 +92,10 @@ export default function Login() {
             </Button>
             <p className="text-sm text-center">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-blue-500 hover:underline">
+              <Link 
+                href={redirect ? `/register?redirect=${redirect}&email=${email}` : "/register"} 
+                className="text-blue-500 hover:underline"
+              >
                 Register here
               </Link>
             </p>

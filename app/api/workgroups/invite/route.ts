@@ -61,8 +61,9 @@ export async function POST(req: NextRequest) {
     { $addToSet: { invitedMembers: email } }
   );
 
-  // Send invitation email
+  // Update the invite URL to not include /app/
   const inviteUrl = `${process.env.NEXTAUTH_URL}/workgroups/accept-invite?id=${invitation._id}`;
+  
   try {
     await sendEmail({
       to: email,

@@ -21,27 +21,34 @@ export const authOptions: NextAuthOptions = {
           const db = client.db();
           const usersCollection = db.collection("users");
           
-          const user = await usersCollection.findOne({ email: credentials.email });
+          // Use case-insensitive email comparison
+          const user = await usersCollection.findOne({ 
+            email: { $regex: new RegExp(`^${credentials.email}$`, 'i') }
+          });
 
           if (!user || !user.password) {
-            throw new Error("User not found");
+            console.log('User not found:', credentials.email);
+            throw new Error("Invalid credentials");
           }
 
           const isPasswordValid = await compare(credentials.password, user.password);
 
           if (!isPasswordValid) {
-            throw new Error("Invalid password");
+            console.log('Invalid password for user:', credentials.email);
+            throw new Error("Invalid credentials");
           }
 
+          // Return normalized user data
           return {
             id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            image: user.image,
+            email: user.email.toLowerCase(), // Normalize email
+            name: user.name || null,
+            image: user.image || null,
           };
         } catch (error) {
           console.error("Error in authorize function:", error);
-          throw error;
+          // Always return "Invalid credentials" to avoid leaking information
+          throw new Error("Invalid credentials");
         }
       }
     })
