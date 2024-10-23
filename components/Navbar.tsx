@@ -2,13 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ListTodo, User, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, User, Users, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { signOut, useSession } from 'next-auth/react';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', href: '/app' },
-  { icon: ListTodo, label: 'Tasks', href: '/app/tasks' },
   { icon: Users, label: 'Workgroups', href: '/app/workgroups' },
   { icon: User, label: 'Profile', href: '/app/profile' },
 ];
