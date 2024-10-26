@@ -119,7 +119,7 @@ export default function WorkgroupsPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div>
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Workgroups</h1>
                 <Dialog
