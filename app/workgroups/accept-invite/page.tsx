@@ -43,8 +43,8 @@ function AcceptInviteContent() {
 
         // If we're authenticated and the emails match, automatically accept the invitation
         if (status === 'authenticated' && session?.user?.email === data.invitedEmail) {
+          // Don't return early, let the UI show briefly
           handleAcceptInvitation();
-          return;
         }
 
       } catch (err: any) {
@@ -55,7 +55,7 @@ function AcceptInviteContent() {
     };
 
     checkInvitation();
-  }, [invitationId, status, session?.user?.email]); // Add session?.user?.email to dependencies
+  }, [invitationId, status, session?.user?.email]);
 
   const handleAcceptInvitation = async () => {
     if (!invitationId) return;
@@ -74,10 +74,12 @@ function AcceptInviteContent() {
         throw new Error(data.error || 'Failed to accept invitation');
       }
 
+      // Add a small delay before redirecting to ensure the UI shows the acceptance state
+      await new Promise(resolve => setTimeout(resolve, 1000));
       router.push('/app/workgroups');
     } catch (err: any) {
       setError(err.message);
-      setLoading(false);  // Only set loading to false on error
+      setLoading(false);
     }
   };
 
