@@ -9,15 +9,10 @@ export async function middleware(request: NextRequest) {
   const isAppPage = request.nextUrl.pathname.startsWith('/app');
   const isAcceptInvitePage = request.nextUrl.pathname.startsWith('/workgroups/accept-invite');
 
-  // Remove the force redirect for accept-invite page
-  // Let the page handle the auth flow with its own UI
-
   if (isAuthPage) {
     if (isAuth) {
-      // Check if there's a redirect parameter
       const redirectUrl = request.nextUrl.searchParams.get('redirect');
       if (redirectUrl) {
-        // Decode the URL before redirecting
         return NextResponse.redirect(new URL(decodeURIComponent(redirectUrl), request.url));
       }
       return NextResponse.redirect(new URL('/app', request.url));
@@ -25,6 +20,7 @@ export async function middleware(request: NextRequest) {
     return null;
   }
 
+  // Only require auth for /app/ routes, not for accept-invite
   if (isAppPage && !isAuth) {
     const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(new URL(`/login?redirect=${callbackUrl}`, request.url));
