@@ -31,7 +31,7 @@ import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
-} from "@/components/ui/accordion"
+} from '@/components/ui/accordion'
 
 interface Workgroup {
     _id: string
@@ -43,9 +43,11 @@ interface Workgroup {
 export default function WorkgroupsPage() {
     const [workgroups, setWorkgroups] = useState<Workgroup[]>([])
     const [newWorkgroupName, setNewWorkgroupName] = useState('')
-    const [selectedWorkgroup, setSelectedWorkgroup] = useState<Workgroup | null>(null)
+    const [selectedWorkgroup, setSelectedWorkgroup] =
+        useState<Workgroup | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+    const [isCreateDialogOpen, setIsCreateDialogOpen] =
+        useState(false)
     const [editName, setEditName] = useState('')
     const [inviteEmail, setInviteEmail] = useState('')
     const { data: session } = useSession()
@@ -97,12 +99,18 @@ export default function WorkgroupsPage() {
 
         if (response.ok) {
             // Refresh workgroup data
-            const updatedResponse = await fetch(`/api/workgroups/${selectedWorkgroup._id}`)
+            const updatedResponse = await fetch(
+                `/api/workgroups/${selectedWorkgroup._id}`
+            )
             if (updatedResponse.ok) {
                 const updatedWorkgroup = await updatedResponse.json()
-                setWorkgroups(workgroups.map(w => 
-                    w._id === updatedWorkgroup._id ? updatedWorkgroup : w
-                ))
+                setWorkgroups(
+                    workgroups.map(w =>
+                        w._id === updatedWorkgroup._id
+                            ? updatedWorkgroup
+                            : w
+                    )
+                )
                 setSelectedWorkgroup(updatedWorkgroup)
             }
             setInviteEmail('')
@@ -113,21 +121,33 @@ export default function WorkgroupsPage() {
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Workgroups</h1>
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <Dialog
+                    open={isCreateDialogOpen}
+                    onOpenChange={setIsCreateDialogOpen}
+                >
                     <DialogTrigger asChild>
                         <Button>Create Workgroup</Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Create New Workgroup</DialogTitle>
+                            <DialogTitle>
+                                Create New Workgroup
+                            </DialogTitle>
                         </DialogHeader>
-                        <form onSubmit={handleCreateWorkgroup} className="space-y-4">
+                        <form
+                            onSubmit={handleCreateWorkgroup}
+                            className="space-y-4"
+                        >
                             <div>
                                 <Label htmlFor="name">Name</Label>
                                 <Input
                                     id="name"
                                     value={newWorkgroupName}
-                                    onChange={e => setNewWorkgroupName(e.target.value)}
+                                    onChange={e =>
+                                        setNewWorkgroupName(
+                                            e.target.value
+                                        )
+                                    }
                                     required
                                 />
                             </div>
@@ -138,9 +158,6 @@ export default function WorkgroupsPage() {
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>Workgroups</CardTitle>
-                </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
@@ -156,14 +173,25 @@ export default function WorkgroupsPage() {
                                     key={workgroup._id}
                                     className="cursor-pointer hover:bg-gray-100"
                                     onClick={() => {
-                                        setSelectedWorkgroup(workgroup)
+                                        setSelectedWorkgroup(
+                                            workgroup
+                                        )
                                         setEditName(workgroup.name)
                                         setIsDialogOpen(true)
                                     }}
                                 >
-                                    <TableCell>{workgroup.name}</TableCell>
-                                    <TableCell>{workgroup.members.length}</TableCell>
-                                    <TableCell>{workgroup.invitedMembers.length}</TableCell>
+                                    <TableCell>
+                                        {workgroup.name}
+                                    </TableCell>
+                                    <TableCell>
+                                        {workgroup.members.length}
+                                    </TableCell>
+                                    <TableCell>
+                                        {
+                                            workgroup.invitedMembers
+                                                .length
+                                        }
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -172,19 +200,32 @@ export default function WorkgroupsPage() {
             </Card>
 
             {/* Workgroup Details Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+            >
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Workgroup Details</DialogTitle>
                     </DialogHeader>
                     {selectedWorkgroup && (
-                        <Accordion type="single" collapsible className="w-full">
+                        <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
+                        >
                             <AccordionItem value="name">
-                                <AccordionTrigger>Name</AccordionTrigger>
+                                <AccordionTrigger>
+                                    Name
+                                </AccordionTrigger>
                                 <AccordionContent>
                                     <Input
                                         value={editName}
-                                        onChange={e => setEditName(e.target.value)}
+                                        onChange={e =>
+                                            setEditName(
+                                                e.target.value
+                                            )
+                                        }
                                         className="mt-1"
                                     />
                                 </AccordionContent>
@@ -192,46 +233,78 @@ export default function WorkgroupsPage() {
 
                             <AccordionItem value="members">
                                 <AccordionTrigger>
-                                    Members ({selectedWorkgroup.members.length})
+                                    Members (
+                                    {selectedWorkgroup.members.length}
+                                    )
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-1">
-                                        {selectedWorkgroup.members.map(member => (
-                                            <div key={member} className="text-sm flex items-center justify-between">
-                                                <span>{member}</span>
-                                            </div>
-                                        ))}
+                                        {selectedWorkgroup.members.map(
+                                            member => (
+                                                <div
+                                                    key={member}
+                                                    className="text-sm flex items-center justify-between"
+                                                >
+                                                    <span>
+                                                        {member}
+                                                    </span>
+                                                </div>
+                                            )
+                                        )}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
 
                             <AccordionItem value="pending">
                                 <AccordionTrigger>
-                                    Pending Invites ({selectedWorkgroup.invitedMembers.length})
+                                    Pending Invites (
+                                    {
+                                        selectedWorkgroup
+                                            .invitedMembers.length
+                                    }
+                                    )
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="space-y-1">
-                                        {selectedWorkgroup.invitedMembers.map(member => (
-                                            <div key={member} className="text-sm flex items-center justify-between">
-                                                <span>{member}</span>
-                                            </div>
-                                        ))}
+                                        {selectedWorkgroup.invitedMembers.map(
+                                            member => (
+                                                <div
+                                                    key={member}
+                                                    className="text-sm flex items-center justify-between"
+                                                >
+                                                    <span>
+                                                        {member}
+                                                    </span>
+                                                </div>
+                                            )
+                                        )}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
 
                             <AccordionItem value="invite">
-                                <AccordionTrigger>Invite New Member</AccordionTrigger>
+                                <AccordionTrigger>
+                                    Invite New Member
+                                </AccordionTrigger>
                                 <AccordionContent>
-                                    <form onSubmit={handleInviteMember} className="space-y-2">
+                                    <form
+                                        onSubmit={handleInviteMember}
+                                        className="space-y-2"
+                                    >
                                         <div className="flex gap-2">
                                             <Input
                                                 type="email"
                                                 value={inviteEmail}
-                                                onChange={e => setInviteEmail(e.target.value)}
+                                                onChange={e =>
+                                                    setInviteEmail(
+                                                        e.target.value
+                                                    )
+                                                }
                                                 placeholder="Email address"
                                             />
-                                            <Button type="submit">Invite</Button>
+                                            <Button type="submit">
+                                                Invite
+                                            </Button>
                                         </div>
                                     </form>
                                 </AccordionContent>

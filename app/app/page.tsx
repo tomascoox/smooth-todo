@@ -228,20 +228,17 @@ export default function DashboardPage() {
                     variant={filter === 'all' ? 'default' : 'outline'}
                     onClick={() => setFilter('all')}
                 >
-                    All Tasks
+                    All Todos
                 </Button>
                 <Button
                     variant={filter === 'my' ? 'default' : 'outline'}
                     onClick={() => setFilter('my')}
                 >
-                    My Tasks
+                    My Todos
                 </Button>
             </div>
 
             <Card className="w-full">
-                <CardHeader>
-                    <CardTitle>Tasks</CardTitle>
-                </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
