@@ -1,13 +1,11 @@
 import { ObjectId } from 'mongodb';
 
 export interface Todo {
-  _id?: ObjectId;
+  _id?: string;
   name: string;
   project: string;
-  creationDate: Date;
-  deadlineDate: Date;
-  userId: string;
-  completed: boolean;
+  deadlineDate: string;
+  userId?: string;
 }
 
 export const TodoSchema = {

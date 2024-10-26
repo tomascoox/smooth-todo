@@ -26,9 +26,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogFooter,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Trash2, Check, X } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
+import { DialogPortal, DialogOverlay } from '@/components/ui/dialog'
 
 export default function DashboardPage() {
     const { data: session, status } = useSession()
@@ -43,6 +45,8 @@ export default function DashboardPage() {
         deadlineDate: '',
     })
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -63,15 +67,10 @@ export default function DashboardPage() {
     const handleCreateTodo = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        console.log('Type of name:', typeof newTodo.name)
-        console.log('Content of name:', newTodo.name)
-        console.log('Type of project:', typeof newTodo.project)
-        console.log('Content of project:', newTodo.project)
-
         const response = await fetch('/api/todos', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json; charset=UTF-8',
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(newTodo),
         })
@@ -84,23 +83,28 @@ export default function DashboardPage() {
         }
     }
 
-    const handleToggleTodo = async (id: string) => {
-        const todo = todos.find(t => t._id?.toString() === id)
-        if (!todo) return
+    const handleEditTodo = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!editingTodo) return
 
         const response = await fetch('/api/todos', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, completed: !todo.completed }),
+            body: JSON.stringify({
+                id: editingTodo._id,
+                name: editingTodo.name,
+                project: editingTodo.project,
+                deadlineDate: editingTodo.deadlineDate,
+            }),
         })
 
         if (response.ok) {
             const updatedTodo = await response.json()
-            setTodos(
-                todos.map(t =>
-                    t._id?.toString() === id ? updatedTodo : t
-                )
-            )
+            setTodos(todos.map(t =>
+                t._id?.toString() === editingTodo._id?.toString() ? updatedTodo : t
+            ))
+            setIsEditDialogOpen(false)
+            setEditingTodo(null)
         }
     }
 
@@ -151,75 +155,80 @@ export default function DashboardPage() {
     if (!session) return null
 
     return (
-        <div>
+        <div className="pb-20"> {/* Add padding-bottom to account for navbar */}
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Dashboard</h1>
-                <Dialog
-                    open={isDialogOpen}
-                    onOpenChange={setIsDialogOpen}
-                >
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                         <Button>Add Todo</Button>
                     </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add New Todo</DialogTitle>
-                        </DialogHeader>
-                        <form
-                            onSubmit={handleCreateTodo}
-                            className="space-y-4"
-                        >
-                            <div>
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    value={newTodo.name}
-                                    onChange={e =>
-                                        setNewTodo({
-                                            ...newTodo,
-                                            name: e.target.value,
-                                        })
-                                    }
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="project">
-                                    Project
-                                </Label>
-                                <Input
-                                    id="project"
-                                    value={newTodo.project}
-                                    onChange={e =>
-                                        setNewTodo({
-                                            ...newTodo,
-                                            project: e.target.value,
-                                        })
-                                    }
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="deadlineDate">
-                                    Deadline
-                                </Label>
-                                <Input
-                                    id="deadlineDate"
-                                    type="date"
-                                    value={newTodo.deadlineDate}
-                                    onChange={e =>
-                                        setNewTodo({
-                                            ...newTodo,
-                                            deadlineDate:
-                                                e.target.value,
-                                        })
-                                    }
-                                    required
-                                />
-                            </div>
-                            <Button type="submit">Save</Button>
-                        </form>
-                    </DialogContent>
+                    <DialogPortal>
+                        <DialogOverlay />
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Add New Todo</DialogTitle>
+                            </DialogHeader>
+                            <form
+                                onSubmit={handleCreateTodo}
+                                className="space-y-4"
+                            >
+                                <div>
+                                    <Label htmlFor="name">Name</Label>
+                                    <Input
+                                        id="name"
+                                        value={newTodo.name}
+                                        onChange={e =>
+                                            setNewTodo({
+                                                ...newTodo,
+                                                name: e.target.value,
+                                            })
+                                        }
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="project">
+                                        Project
+                                    </Label>
+                                    <Input
+                                        id="project"
+                                        value={newTodo.project}
+                                        onChange={e =>
+                                            setNewTodo({
+                                                ...newTodo,
+                                                project: e.target.value,
+                                            })
+                                        }
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="deadlineDate">
+                                        Deadline
+                                    </Label>
+                                    <Input
+                                        id="deadlineDate"
+                                        type="date"
+                                        value={newTodo.deadlineDate}
+                                        onChange={e =>
+                                            setNewTodo({
+                                                ...newTodo,
+                                                deadlineDate:
+                                                    e.target.value,
+                                            })
+                                        }
+                                        required
+                                    />
+                                </div>
+                                <DialogFooter>
+                                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit">Save</Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </DialogPortal>
                 </Dialog>
             </div>
 
@@ -287,28 +296,17 @@ export default function DashboardPage() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() =>
-                                                handleToggleTodo(
-                                                    todo._id?.toString() ||
-                                                        ''
-                                                )
-                                            }
+                                            onClick={() => {
+                                                setEditingTodo(todo)
+                                                setIsEditDialogOpen(true)
+                                            }}
                                         >
-                                            {todo.completed ? (
-                                                <Check className="h-4 w-4" />
-                                            ) : (
-                                                <X className="h-4 w-4" />
-                                            )}
+                                            <Pencil className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() =>
-                                                handleDeleteTodo(
-                                                    todo._id?.toString() ||
-                                                        ''
-                                                )
-                                            }
+                                            onClick={() => handleDeleteTodo(todo._id?.toString() || '')}
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
@@ -319,6 +317,68 @@ export default function DashboardPage() {
                     </Table>
                 </CardContent>
             </Card>
+
+            <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+                setIsEditDialogOpen(open)
+                if (!open) setEditingTodo(null)
+            }}>
+                <DialogPortal>
+                    <DialogOverlay />
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit Todo</DialogTitle>
+                        </DialogHeader>
+                        <form onSubmit={handleEditTodo} className="space-y-4">
+                            <div>
+                                <Label htmlFor="edit-name">Name</Label>
+                                <Input
+                                    id="edit-name"
+                                    value={editingTodo?.name || ''}
+                                    onChange={e =>
+                                        setEditingTodo(prev => 
+                                            prev ? { ...prev, name: e.target.value } : null
+                                        )
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="edit-project">Project</Label>
+                                <Input
+                                    id="edit-project"
+                                    value={editingTodo?.project || ''}
+                                    onChange={e =>
+                                        setEditingTodo(prev => 
+                                            prev ? { ...prev, project: e.target.value } : null
+                                        )
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="edit-deadline">Deadline</Label>
+                                <Input
+                                    id="edit-deadline"
+                                    type="date"
+                                    value={editingTodo?.deadlineDate || ''}
+                                    onChange={e =>
+                                        setEditingTodo(prev => 
+                                            prev ? { ...prev, deadlineDate: e.target.value } : null
+                                        )
+                                    }
+                                    required
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit">Save Changes</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </DialogPortal>
+            </Dialog>
         </div>
     )
 }
