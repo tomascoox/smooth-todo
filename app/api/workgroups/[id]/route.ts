@@ -39,3 +39,41 @@ export async function GET(
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || !session.user.email) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const db = await connectToDatabase();
+
+    try {
+        // First check if the user is the owner of the workgroup
+        const workgroup = await db.collection('workgroups').findOne({
+            _id: new ObjectId(params.id),
+            ownerId: session.user.id
+        });
+
+        if (!workgroup) {
+            return NextResponse.json({ error: 'Workgroup not found or unauthorized' }, { status: 404 });
+        }
+
+        // Delete the workgroup
+        const result = await db.collection('workgroups').deleteOne({
+            _id: new ObjectId(params.id)
+        });
+
+        if (result.deletedCount === 0) {
+            return NextResponse.json({ error: 'Failed to delete workgroup' }, { status: 400 });
+        }
+
+        return NextResponse.json({ message: 'Workgroup deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting workgroup:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
