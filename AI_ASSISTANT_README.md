@@ -72,3 +72,9 @@ Best Practices:
 Adhere to the latest industry standards and conventions.
 Use Git best practices for version control. Encourage small, frequent commits with meaningful messages.
 Consider SEO optimizations when building pages.
+
+Only follow what's explicitly stated in the README
+
+Wait for your specific instructions before making any changes
+
+Do not make assumptions about anything

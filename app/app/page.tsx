@@ -27,10 +27,32 @@ import {
     DialogTitle,
     DialogTrigger,
     DialogFooter,
+    DialogDescription,  // Add this import
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Pencil, Trash2 } from 'lucide-react'
 import { DialogPortal, DialogOverlay } from '@/components/ui/dialog'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+// Add this helper function at the top of the file
+const formatDateForInput = (dateString: string) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toISOString().split('T')[0]
+}
+
+interface Workgroup {
+    _id: string
+    name: string
+    members: string[]
+    invitedMembers: string[]
+}
 
 export default function DashboardPage() {
     const { data: session, status } = useSession()
@@ -43,16 +65,19 @@ export default function DashboardPage() {
         name: '',
         project: '',
         deadlineDate: '',
+        workgroupId: '', // Add this field
     })
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [workgroups, setWorkgroups] = useState<Workgroup[]>([])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/login')
         } else if (status === 'authenticated') {
             fetchTodos()
+            fetchWorkgroups()
         }
     }, [status, router])
 
@@ -61,6 +86,14 @@ export default function DashboardPage() {
         if (response.ok) {
             const data = await response.json()
             setTodos(data)
+        }
+    }
+
+    const fetchWorkgroups = async () => {
+        const response = await fetch('/api/workgroups')
+        if (response.ok) {
+            const data = await response.json()
+            setWorkgroups(data)
         }
     }
 
@@ -78,33 +111,37 @@ export default function DashboardPage() {
         if (response.ok) {
             const createdTodo = await response.json()
             setTodos([...todos, createdTodo])
-            setNewTodo({ name: '', project: '', deadlineDate: '' })
+            setNewTodo({ name: '', project: '', deadlineDate: '', workgroupId: '' })
             setIsDialogOpen(false)
         }
     }
 
     const handleEditTodo = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!editingTodo) return
+        if (!editingTodo?._id) return
 
-        const response = await fetch('/api/todos', {
+        const response = await fetch(`/api/todos/${editingTodo._id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                id: editingTodo._id,
                 name: editingTodo.name,
                 project: editingTodo.project,
                 deadlineDate: editingTodo.deadlineDate,
+                workgroupId: editingTodo.workgroupId,
             }),
         })
 
         if (response.ok) {
             const updatedTodo = await response.json()
-            setTodos(todos.map(t =>
-                t._id?.toString() === editingTodo._id?.toString() ? updatedTodo : t
-            ))
+            setTodos(prevTodos => 
+                prevTodos.map(todo => 
+                    todo._id === editingTodo._id ? updatedTodo : todo
+                )
+            )
             setIsEditDialogOpen(false)
             setEditingTodo(null)
+        } else {
+            console.error('Failed to update todo')
         }
     }
 
@@ -167,6 +204,9 @@ export default function DashboardPage() {
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Add New Todo</DialogTitle>
+                                <DialogDescription>
+                                    Create a new todo item by filling out the form below.
+                                </DialogDescription>
                             </DialogHeader>
                             <form
                                 onSubmit={handleCreateTodo}
@@ -209,17 +249,41 @@ export default function DashboardPage() {
                                     <Input
                                         id="deadlineDate"
                                         type="date"
-                                        value={newTodo.deadlineDate}
+                                        value={formatDateForInput(newTodo.deadlineDate)}
                                         onChange={e =>
                                             setNewTodo({
                                                 ...newTodo,
-                                                deadlineDate:
-                                                    e.target.value,
+                                                deadlineDate: new Date(e.target.value).toISOString()
                                             })
                                         }
                                         required
                                     />
                                 </div>
+                                {workgroups.length > 0 && (
+                                    <div>
+                                        <Label htmlFor="workgroup">Workgroup</Label>
+                                        <Select
+                                            value={newTodo.workgroupId}
+                                            onValueChange={(value) => 
+                                                setNewTodo(prev => ({ ...prev, workgroupId: value }))
+                                            }
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a workgroup" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {workgroups.map((workgroup) => (
+                                                    <SelectItem 
+                                                        key={workgroup._id} 
+                                                        value={workgroup._id}
+                                                    >
+                                                        {workgroup.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
                                 <DialogFooter>
                                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                                         Cancel
@@ -327,6 +391,9 @@ export default function DashboardPage() {
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Edit Todo</DialogTitle>
+                            <DialogDescription>
+                                Make changes to your todo item below.
+                            </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleEditTodo} className="space-y-4">
                             <div>
@@ -360,15 +427,42 @@ export default function DashboardPage() {
                                 <Input
                                     id="edit-deadline"
                                     type="date"
-                                    value={editingTodo?.deadlineDate || ''}
+                                    value={formatDateForInput(editingTodo?.deadlineDate || '')}
                                     onChange={e =>
                                         setEditingTodo(prev => 
-                                            prev ? { ...prev, deadlineDate: e.target.value } : null
+                                            prev ? { ...prev, deadlineDate: new Date(e.target.value).toISOString() } : null
                                         )
                                     }
                                     required
                                 />
                             </div>
+                            {workgroups.length > 0 && (
+                                <div>
+                                    <Label htmlFor="edit-workgroup">Workgroup</Label>
+                                    <Select
+                                        value={editingTodo?.workgroupId || ''}
+                                        onValueChange={(value) =>
+                                            setEditingTodo(prev =>
+                                                prev ? { ...prev, workgroupId: value } : null
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a workgroup" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {workgroups.map((workgroup) => (
+                                                <SelectItem 
+                                                    key={workgroup._id} 
+                                                    value={workgroup._id}
+                                                >
+                                                    {workgroup.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                                     Cancel

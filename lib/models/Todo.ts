@@ -4,8 +4,10 @@ export interface Todo {
   _id?: string;
   name: string;
   project: string;
+  creationDate: string;
   deadlineDate: string;
-  userId?: string;
+  userId: string;
+  workgroupId?: string;
 }
 
 export const TodoSchema = {
@@ -13,8 +15,9 @@ export const TodoSchema = {
   fields: {
     name: { type: 'string', required: true },
     project: { type: 'string', required: true },
-    creationDate: { type: 'date', required: true },
-    deadlineDate: { type: 'date', required: true },
+    creationDate: { type: 'string', required: true },
+    deadlineDate: { type: 'string', required: true },
     userId: { type: 'string', required: true },
+    workgroupId: { type: 'string', required: false },
   },
 };
