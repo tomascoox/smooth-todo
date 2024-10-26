@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss";
 import plugin from "tailwindcss/plugin";
 
 const config: Config = {
@@ -11,7 +11,7 @@ const config: Config = {
     ],
     theme: {
     	container: {
-    		center: 'true',
+    		center: true,
     		padding: '2rem',
     		screens: {
     			'2xl': '1400px'
