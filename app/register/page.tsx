@@ -57,7 +57,7 @@ function RegisterContent() {
         throw new Error(result.error);
       }
 
-      // If we have an invitation, redirect to the accept invite page
+      // After successful registration and sign in
       if (invitationId) {
         router.push(`/workgroups/accept-invite?id=${invitationId}`);
       } else {

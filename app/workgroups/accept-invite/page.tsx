@@ -20,6 +20,9 @@ function AcceptInviteContent() {
 
   useEffect(() => {
     const checkInvitation = async () => {
+      // Don't proceed until we know the session status
+      if (status === 'loading') return;
+
       if (!invitationId) {
         setError('Invalid invitation link');
         setLoading(false);
@@ -45,7 +48,7 @@ function AcceptInviteContent() {
     };
 
     checkInvitation();
-  }, [invitationId]);
+  }, [invitationId, status]); // Add status to dependencies
 
   const handleAcceptInvitation = async () => {
     if (!invitationId) return;
@@ -78,7 +81,8 @@ function AcceptInviteContent() {
     router.push(`/login?redirect=${callbackUrl}&email=${invitedEmail}`);
   };
 
-  if (loading) {
+  // Show loading state while session is being established
+  if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Loading...</p>
