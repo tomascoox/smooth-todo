@@ -7,7 +7,6 @@ export async function middleware(request: NextRequest) {
   const isAuth = !!token;
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register');
   const isAppPage = request.nextUrl.pathname.startsWith('/app');
-  const isAcceptInvitePage = request.nextUrl.pathname.startsWith('/workgroups/accept-invite');
 
   if (isAuthPage) {
     if (isAuth) {
@@ -20,7 +19,6 @@ export async function middleware(request: NextRequest) {
     return null;
   }
 
-  // Only require auth for /app/ routes, not for accept-invite
   if (isAppPage && !isAuth) {
     const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
     return NextResponse.redirect(new URL(`/login?redirect=${callbackUrl}`, request.url));
@@ -30,5 +28,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/login', '/register', '/workgroups/accept-invite'],
+  matcher: ['/app/:path*', '/login', '/register'],  // Removed /workgroups/accept-invite
 };
