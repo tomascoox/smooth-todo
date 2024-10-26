@@ -20,7 +20,6 @@ function AcceptInviteContent() {
 
   useEffect(() => {
     const checkInvitation = async () => {
-      // Don't proceed until we know the session status
       if (status === 'loading') return;
 
       if (!invitationId) {
@@ -40,22 +39,16 @@ function AcceptInviteContent() {
         setWorkgroupName(data.workgroupName);
         setHasAccount(data.hasAccount);
         setInvitedEmail(data.invitedEmail);
-
-        // If we're authenticated and the emails match, automatically accept the invitation
-        if (status === 'authenticated' && session?.user?.email === data.invitedEmail) {
-          // Don't return early, let the UI show briefly
-          handleAcceptInvitation();
-        }
+        setLoading(false);
 
       } catch (err: any) {
         setError(err.message);
-      } finally {
         setLoading(false);
       }
     };
 
     checkInvitation();
-  }, [invitationId, status, session?.user?.email]);
+  }, [invitationId, status]);  // Removed session?.user?.email dependency
 
   const handleAcceptInvitation = async () => {
     if (!invitationId) return;

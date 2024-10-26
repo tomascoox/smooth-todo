@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ 
       workgroupName: workgroup.name,
-      hasAccount: !!existingUser,
+      hasAccount: !!existingUser,  // This converts null/undefined to false
       invitedEmail: invitation.invitedEmail
     });
   } catch (error) {
