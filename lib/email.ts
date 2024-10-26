@@ -9,7 +9,11 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, text, html }: EmailOptions) {
   if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN || !process.env.MAILGUN_FROM_EMAIL) {
-    console.error('Mailgun configuration is missing');
+    console.error('Missing env vars:', {
+      MAILGUN_API_KEY: !!process.env.MAILGUN_API_KEY,
+      MAILGUN_DOMAIN: !!process.env.MAILGUN_DOMAIN,
+      MAILGUN_FROM_EMAIL: !!process.env.MAILGUN_FROM_EMAIL
+    });
     throw new Error('Mailgun configuration is missing');
   }
 
