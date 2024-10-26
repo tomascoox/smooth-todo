@@ -194,7 +194,7 @@ export default function DashboardPage() {
                     </DialogTrigger>
                     <DialogPortal>
                         <DialogOverlay />
-                        <DialogContent>
+                        <DialogContent className="selection:bg-gray-200 selection:text-black">
                             <DialogHeader>
                                 <DialogTitle>Add New Todo</DialogTitle>
                                 <DialogDescription>
@@ -220,9 +220,7 @@ export default function DashboardPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="project">
-                                        Project
-                                    </Label>
+                                    <Label htmlFor="project">Project</Label>
                                     <Input
                                         id="project"
                                         value={newTodo.project}
@@ -232,7 +230,6 @@ export default function DashboardPage() {
                                                 project: e.target.value,
                                             })
                                         }
-                                        required
                                     />
                                 </div>
                                 <div>
@@ -358,7 +355,7 @@ export default function DashboardPage() {
             }}>
                 <DialogPortal>
                     <DialogOverlay />
-                    <DialogContent>
+                    <DialogContent className="selection:bg-gray-200 selection:text-black">
                         <DialogHeader>
                             <DialogTitle>Edit Todo</DialogTitle>
                             <DialogDescription>
@@ -389,7 +386,6 @@ export default function DashboardPage() {
                                             prev ? { ...prev, project: e.target.value } : null
                                         )
                                     }
-                                    required
                                 />
                             </div>
                             <div>
