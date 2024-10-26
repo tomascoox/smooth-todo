@@ -33,6 +33,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion'
 import { DialogPortal, DialogOverlay } from '@/components/ui/dialog'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface Workgroup {
     _id: string
@@ -118,6 +119,16 @@ export default function WorkgroupsPage() {
         }
     }
 
+    const handleDeleteWorkgroup = async (id: string) => {
+        const response = await fetch(`/api/workgroups/${id}`, {
+            method: 'DELETE',
+        })
+
+        if (response.ok) {
+            setWorkgroups(workgroups.filter(w => w._id !== id))
+        }
+    }
+
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
@@ -164,34 +175,48 @@ export default function WorkgroupsPage() {
             <Card>
                 <CardContent className="p-0">
                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="h-8 py-0">Name</TableHead>
-                                <TableHead className="h-8 py-0">Members</TableHead>
-                                <TableHead className="h-8 py-0">Pending Invites</TableHead>
-                            </TableRow>
-                        </TableHeader>
                         <TableBody>
                             {workgroups.map(workgroup => (
                                 <TableRow
                                     key={workgroup._id}
                                     className="cursor-pointer hover:bg-gray-100 h-8"
                                     onClick={() => {
-                                        setSelectedWorkgroup(
-                                            workgroup
-                                        )
+                                        setSelectedWorkgroup(workgroup)
                                         setEditName(workgroup.name)
                                         setIsDialogOpen(true)
                                     }}
                                 >
-                                    <TableCell className="py-0">
+                                    <TableCell className="py-0 w-full">
                                         {workgroup.name}
                                     </TableCell>
-                                    <TableCell className="py-0">
-                                        {workgroup.members.length}
-                                    </TableCell>
-                                    <TableCell className="py-0">
-                                        {workgroup.invitedMembers.length}
+                                    <TableCell className="py-0 w-[100px]">
+                                        <div 
+                                            className="flex justify-end gap-2 relative z-10"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                            }}
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6"
+                                                onClick={() => {
+                                                    setSelectedWorkgroup(workgroup)
+                                                    setEditName(workgroup.name)
+                                                    setIsDialogOpen(true)
+                                                }}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6"
+                                                onClick={() => handleDeleteWorkgroup(workgroup._id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -218,7 +243,7 @@ export default function WorkgroupsPage() {
                                 className="w-full"
                             >
                                 <AccordionItem value="name">
-                                    <AccordionTrigger>
+                                    <AccordionTrigger className="hover:no-underline">
                                         Name
                                     </AccordionTrigger>
                                     <AccordionContent>
@@ -235,10 +260,8 @@ export default function WorkgroupsPage() {
                                 </AccordionItem>
 
                                 <AccordionItem value="members">
-                                    <AccordionTrigger>
-                                        Members (
-                                        {selectedWorkgroup.members.length}
-                                        )
+                                    <AccordionTrigger className="hover:no-underline">
+                                        Members ({selectedWorkgroup.members.length})
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="space-y-1">
@@ -259,13 +282,8 @@ export default function WorkgroupsPage() {
                                 </AccordionItem>
 
                                 <AccordionItem value="pending">
-                                    <AccordionTrigger>
-                                        Pending Invites (
-                                        {
-                                            selectedWorkgroup
-                                                .invitedMembers.length
-                                        }
-                                        )
+                                    <AccordionTrigger className="hover:no-underline">
+                                        Pending Invites ({selectedWorkgroup.invitedMembers.length})
                                     </AccordionTrigger>
                                     <AccordionContent>
                                         <div className="space-y-1">
@@ -286,7 +304,7 @@ export default function WorkgroupsPage() {
                                 </AccordionItem>
 
                                 <AccordionItem value="invite">
-                                    <AccordionTrigger>
+                                    <AccordionTrigger className="hover:no-underline">
                                         Invite New Member
                                     </AccordionTrigger>
                                     <AccordionContent>
