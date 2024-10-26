@@ -36,6 +36,7 @@ import {
     AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Pencil, Trash2 } from 'lucide-react'
+import { toast } from 'react-hot-toast'  // Add this import at the top
 
 interface Workgroup {
     _id: string
@@ -53,6 +54,7 @@ export default function WorkgroupsPage() {
     const [editName, setEditName] = useState('')
     const [inviteEmail, setInviteEmail] = useState('')
     const { data: session } = useSession()
+    const [openAccordion, setOpenAccordion] = useState<string | undefined>("")
 
     useEffect(() => {
         const fetchWorkgroups = async () => {
@@ -100,6 +102,9 @@ export default function WorkgroupsPage() {
         })
 
         if (response.ok) {
+            // Show success toast
+            toast.success('Invitation sent successfully!')
+            
             // Refresh workgroup data
             const updatedResponse = await fetch(
                 `/api/workgroups/${selectedWorkgroup._id}`
@@ -116,6 +121,10 @@ export default function WorkgroupsPage() {
                 setSelectedWorkgroup(updatedWorkgroup)
             }
             setInviteEmail('')
+        } else {
+            // Show error toast with the error message from the server
+            const error = await response.json()
+            toast.error(error.error || 'Failed to send invitation')
         }
     }
 
@@ -247,7 +256,8 @@ export default function WorkgroupsPage() {
                                 type="single"
                                 collapsible
                                 className="w-full"
-                                defaultValue=""
+                                value={openAccordion}
+                                onValueChange={setOpenAccordion}
                             >
                                 <AccordionItem value="name">
                                     <AccordionTrigger className="hover:no-underline">
