@@ -28,5 +28,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/app/:path*', '/login', '/register'],  // Removed /workgroups/accept-invite
+  matcher: ['/app/:path*', '/login', '/register', '/workgroups/accept-invite'],  // Added /workgroups/accept-invite
 };
