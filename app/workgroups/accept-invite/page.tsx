@@ -40,6 +40,13 @@ function AcceptInviteContent() {
         setWorkgroupName(data.workgroupName);
         setHasAccount(data.hasAccount);
         setInvitedEmail(data.invitedEmail);
+
+        // If we're authenticated and the emails match, automatically accept the invitation
+        if (status === 'authenticated' && session?.user?.email === data.invitedEmail) {
+          handleAcceptInvitation();
+          return;
+        }
+
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -48,7 +55,7 @@ function AcceptInviteContent() {
     };
 
     checkInvitation();
-  }, [invitationId, status]); // Add status to dependencies
+  }, [invitationId, status, session?.user?.email]); // Add session?.user?.email to dependencies
 
   const handleAcceptInvitation = async () => {
     if (!invitationId) return;
@@ -70,8 +77,7 @@ function AcceptInviteContent() {
       router.push('/app/workgroups');
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setLoading(false);
+      setLoading(false);  // Only set loading to false on error
     }
   };
 
