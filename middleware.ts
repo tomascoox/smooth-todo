@@ -9,11 +9,8 @@ export async function middleware(request: NextRequest) {
   const isAppPage = request.nextUrl.pathname.startsWith('/app');
   const isAcceptInvitePage = request.nextUrl.pathname.startsWith('/workgroups/accept-invite');
 
-  // For accept-invite page, redirect to login if not authenticated
-  if (isAcceptInvitePage && !isAuth) {
-    const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
-    return NextResponse.redirect(new URL(`/login?redirect=${callbackUrl}`, request.url));
-  }
+  // Remove the force redirect for accept-invite page
+  // Let the page handle the auth flow with its own UI
 
   if (isAuthPage) {
     if (isAuth) {
