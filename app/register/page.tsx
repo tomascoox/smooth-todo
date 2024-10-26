@@ -57,6 +57,9 @@ function RegisterContent() {
         throw new Error(result.error);
       }
 
+      // Add a small delay to ensure the session is established
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // After successful registration and sign in
       if (invitationId) {
         router.push(`/workgroups/accept-invite?id=${invitationId}`);
