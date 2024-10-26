@@ -78,7 +78,8 @@ export async function POST(req: NextRequest) {
         )
 
     // Update the invite URL to not include /app/
-    const inviteUrl = `${process.env.NEXTAUTH_URL}/workgroups/accept-invite?id=${invitation._id}`
+    const baseUrl = process.env.NEXTAUTH_URL?.replace('www.', '') || ''
+    const inviteUrl = `${baseUrl}/workgroups/accept-invite?id=${invitation._id}`
 
     try {
         await sendEmail({
