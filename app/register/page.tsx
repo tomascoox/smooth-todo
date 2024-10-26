@@ -50,22 +50,13 @@ function RegisterContent() {
       const result = await signIn('credentials', {
         email,
         password,
-        redirect: false
+        callbackUrl: invitationId 
+          ? `/workgroups/accept-invite?id=${invitationId}`
+          : '/app',
+        redirect: true  // Let NextAuth handle the redirect
       });
 
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-
-      // Add a small delay to ensure the session is established
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // After successful registration and sign in
-      if (invitationId) {
-        router.push(`/workgroups/accept-invite?id=${invitationId}`);
-      } else {
-        router.push('/app');
-      }
+      // The code won't reach here because of redirect: true
     } catch (err: any) {
       setError(err.message);
       setIsLoading(false);
