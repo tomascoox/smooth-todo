@@ -138,7 +138,7 @@ export default function WorkgroupsPage() {
                     onOpenChange={setIsCreateDialogOpen}
                 >
                     <DialogTrigger asChild>
-                        <Button>Create Workgroup</Button>
+                        <Button>Add Workgroup</Button>
                     </DialogTrigger>
                     <DialogPortal>
                         <DialogOverlay />
