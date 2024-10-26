@@ -9,25 +9,28 @@ export async function middleware(request: NextRequest) {
   const isAppPage = request.nextUrl.pathname.startsWith('/app');
   const isAcceptInvitePage = request.nextUrl.pathname.startsWith('/workgroups/accept-invite');
 
-  // Allow access to accept-invite page without authentication
-  if (isAcceptInvitePage) {
-    return null;
+  // For accept-invite page, redirect to login if not authenticated
+  if (isAcceptInvitePage && !isAuth) {
+    const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(new URL(`/login?redirect=${callbackUrl}`, request.url));
   }
 
   if (isAuthPage) {
     if (isAuth) {
-      const redirect = new URL(request.nextUrl.searchParams.get('redirect') || '/app', request.url);
-      return NextResponse.redirect(redirect);
+      // Check if there's a redirect parameter
+      const redirectUrl = request.nextUrl.searchParams.get('redirect');
+      if (redirectUrl) {
+        // Decode the URL before redirecting
+        return NextResponse.redirect(new URL(decodeURIComponent(redirectUrl), request.url));
+      }
+      return NextResponse.redirect(new URL('/app', request.url));
     }
     return null;
   }
 
-  if (isAppPage) {
-    if (!isAuth) {
-      const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
-      return NextResponse.redirect(new URL(`/login?redirect=${callbackUrl}`, request.url));
-    }
-    return null;
+  if (isAppPage && !isAuth) {
+    const callbackUrl = encodeURIComponent(request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(new URL(`/login?redirect=${callbackUrl}`, request.url));
   }
 
   return null;
