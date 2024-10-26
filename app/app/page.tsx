@@ -40,13 +40,6 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-// Add this helper function at the top of the file
-const formatDateForInput = (dateString: string) => {
-    if (!dateString) return ''
-    const date = new Date(dateString)
-    return date.toISOString().split('T')[0]
-}
-
 interface Workgroup {
     _id: string
     name: string
@@ -249,14 +242,13 @@ export default function DashboardPage() {
                                     <Input
                                         id="deadlineDate"
                                         type="date"
-                                        value={formatDateForInput(newTodo.deadlineDate)}
+                                        value={newTodo.deadlineDate}
                                         onChange={e =>
                                             setNewTodo({
                                                 ...newTodo,
-                                                deadlineDate: new Date(e.target.value).toISOString()
+                                                deadlineDate: e.target.value
                                             })
                                         }
-                                        required
                                     />
                                 </div>
                                 {workgroups.length > 0 && (
@@ -314,66 +306,44 @@ export default function DashboardPage() {
             <Card className="w-full">
                 <CardContent className="p-0">
                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead
-                                    onClick={() => toggleSort('name')}
-                                    className="cursor-pointer"
-                                >
-                                    Name{' '}
-                                    {sortBy === 'name' &&
-                                        (sortOrder === 'asc'
-                                            ? '↑'
-                                            : '↓')}
-                                </TableHead>
-                                <TableHead>Project</TableHead>
-                                <TableHead
-                                    onClick={() =>
-                                        toggleSort('deadlineDate')
-                                    }
-                                    className="cursor-pointer"
-                                >
-                                    Deadline{' '}
-                                    {sortBy === 'deadlineDate' &&
-                                        (sortOrder === 'asc'
-                                            ? '↑'
-                                            : '↓')}
-                                </TableHead>
-                                <TableHead>Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
                         <TableBody>
                             {sortedTodos.map(todo => (
-                                <TableRow key={todo._id?.toString()}>
-                                    <TableCell className="py-2">
+                                <TableRow 
+                                    key={todo._id?.toString()}
+                                    className="cursor-pointer hover:bg-gray-100 relative w-full h-8" // Reduced height to h-8
+                                    onClick={() => {
+                                        setEditingTodo(todo)
+                                        setIsEditDialogOpen(true)
+                                    }}
+                                >
+                                    <TableCell className="py-0 w-full"> {/* Removed vertical padding */}
                                         {todo.name}
                                     </TableCell>
-                                    <TableCell className="py-2">
-                                        {todo.project}
-                                    </TableCell>
-                                    <TableCell className="py-2">
-                                        {new Date(
-                                            todo.deadlineDate
-                                        ).toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell className="py-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => {
-                                                setEditingTodo(todo)
-                                                setIsEditDialogOpen(true)
+                                    <TableCell className="py-0 w-[100px]"> {/* Removed vertical padding */}
+                                        <div 
+                                            className="flex justify-end gap-2"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
                                             }}
                                         >
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDeleteTodo(todo._id?.toString() || '')}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => {
+                                                    setEditingTodo(todo)
+                                                    setIsEditDialogOpen(true)
+                                                }}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDeleteTodo(todo._id?.toString() || '')}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -427,13 +397,12 @@ export default function DashboardPage() {
                                 <Input
                                     id="edit-deadline"
                                     type="date"
-                                    value={formatDateForInput(editingTodo?.deadlineDate || '')}
+                                    value={editingTodo?.deadlineDate || ''}
                                     onChange={e =>
                                         setEditingTodo(prev => 
-                                            prev ? { ...prev, deadlineDate: new Date(e.target.value).toISOString() } : null
+                                            prev ? { ...prev, deadlineDate: e.target.value } : null
                                         )
                                     }
-                                    required
                                 />
                             </div>
                             {workgroups.length > 0 && (
