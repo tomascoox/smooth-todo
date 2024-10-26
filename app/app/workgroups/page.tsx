@@ -14,6 +14,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogPortal,
+    DialogOverlay,
+    DialogDescription,  // Added this import
 } from '@/components/ui/dialog'
 import {
     Table,
@@ -32,7 +35,6 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion'
-import { DialogPortal, DialogOverlay } from '@/components/ui/dialog'
 import { Pencil, Trash2 } from 'lucide-react'
 
 interface Workgroup {
@@ -45,11 +47,9 @@ interface Workgroup {
 export default function WorkgroupsPage() {
     const [workgroups, setWorkgroups] = useState<Workgroup[]>([])
     const [newWorkgroupName, setNewWorkgroupName] = useState('')
-    const [selectedWorkgroup, setSelectedWorkgroup] =
-        useState<Workgroup | null>(null)
+    const [selectedWorkgroup, setSelectedWorkgroup] = useState<Workgroup | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isCreateDialogOpen, setIsCreateDialogOpen] =
-        useState(false)
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
     const [editName, setEditName] = useState('')
     const [inviteEmail, setInviteEmail] = useState('')
     const { data: session } = useSession()
@@ -147,6 +147,9 @@ export default function WorkgroupsPage() {
                                 <DialogTitle>
                                     Create New Workgroup
                                 </DialogTitle>
+                                <DialogDescription>
+                                    Create a new workgroup by entering a name below.
+                                </DialogDescription>
                             </DialogHeader>
                             <form
                                 onSubmit={handleCreateWorkgroup}
@@ -235,12 +238,16 @@ export default function WorkgroupsPage() {
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
                             <DialogTitle>Workgroup Details</DialogTitle>
+                            <DialogDescription>
+                                View and manage your workgroup settings below.
+                            </DialogDescription>
                         </DialogHeader>
                         {selectedWorkgroup && (
                             <Accordion
                                 type="single"
                                 collapsible
                                 className="w-full"
+                                defaultValue=""
                             >
                                 <AccordionItem value="name">
                                     <AccordionTrigger className="hover:no-underline">

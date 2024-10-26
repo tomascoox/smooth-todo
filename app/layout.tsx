@@ -1,22 +1,12 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from 'react-hot-toast';
 import ClientProvider from "@/components/ClientProvider";
 import { AuthCheck } from "@/components/AuthCheck";
 import { Navbar } from "@/components/Navbar";
-
-const geistSans = localFont({
-  src: "../fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "../fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -36,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className="antialiased flex flex-col min-h-screen">
         <AuthProvider>
           <ClientProvider>
             <AuthCheck />
