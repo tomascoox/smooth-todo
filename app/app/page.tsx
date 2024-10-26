@@ -303,20 +303,22 @@ export default function DashboardPage() {
             <Card className="w-full">
                 <CardContent className="p-0">
                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="h-8 py-0">Name</TableHead>
+                                <TableHead className="h-8 py-0">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
                         <TableBody>
                             {sortedTodos.map(todo => (
                                 <TableRow 
                                     key={todo._id?.toString()}
-                                    className="cursor-pointer hover:bg-gray-100 relative w-full h-8" // Reduced height to h-8
-                                    onClick={() => {
-                                        setEditingTodo(todo)
-                                        setIsEditDialogOpen(true)
-                                    }}
+                                    className="cursor-pointer hover:bg-gray-100 relative w-full h-8"
                                 >
-                                    <TableCell className="py-0 w-full"> {/* Removed vertical padding */}
+                                    <TableCell className="py-0 w-full">
                                         {todo.name}
                                     </TableCell>
-                                    <TableCell className="py-0 w-[100px]"> {/* Removed vertical padding */}
+                                    <TableCell className="py-0 w-[100px]">
                                         <div 
                                             className="flex justify-end gap-2"
                                             onClick={(e) => {
@@ -326,6 +328,7 @@ export default function DashboardPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
+                                                className="h-6 w-6"  // Added smaller size
                                                 onClick={() => {
                                                     setEditingTodo(todo)
                                                     setIsEditDialogOpen(true)
@@ -336,6 +339,7 @@ export default function DashboardPage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
+                                                className="h-6 w-6"  // Added smaller size
                                                 onClick={() => handleDeleteTodo(todo._id?.toString() || '')}
                                             >
                                                 <Trash2 className="h-4 w-4" />

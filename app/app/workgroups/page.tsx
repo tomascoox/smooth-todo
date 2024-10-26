@@ -166,16 +166,16 @@ export default function WorkgroupsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Members</TableHead>
-                                <TableHead>Pending Invites</TableHead>
+                                <TableHead className="h-8 py-0">Name</TableHead>
+                                <TableHead className="h-8 py-0">Members</TableHead>
+                                <TableHead className="h-8 py-0">Pending Invites</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {workgroups.map(workgroup => (
                                 <TableRow
                                     key={workgroup._id}
-                                    className="cursor-pointer hover:bg-gray-100"
+                                    className="cursor-pointer hover:bg-gray-100 h-8"
                                     onClick={() => {
                                         setSelectedWorkgroup(
                                             workgroup
@@ -184,17 +184,14 @@ export default function WorkgroupsPage() {
                                         setIsDialogOpen(true)
                                     }}
                                 >
-                                    <TableCell>
+                                    <TableCell className="py-0">
                                         {workgroup.name}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-0">
                                         {workgroup.members.length}
                                     </TableCell>
-                                    <TableCell>
-                                        {
-                                            workgroup.invitedMembers
-                                                .length
-                                        }
+                                    <TableCell className="py-0">
+                                        {workgroup.invitedMembers.length}
                                     </TableCell>
                                 </TableRow>
                             ))}
