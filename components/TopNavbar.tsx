@@ -2,7 +2,7 @@
 
 import { useUser } from '@/contexts/UserContext';
 import { Menu } from 'lucide-react';
-import Image from 'next/image';
+import { Image } from '@/components/ui/image';  // Make sure this path is correct
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -36,6 +36,7 @@ export function TopNavbar() {
               height={32}
               className="object-cover w-full h-full"
               priority
+              fallbackSrc="/images/default-avatar.png"
             />
           </div>
           <span className="font-semibold">Hello {userName}</span>

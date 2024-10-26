@@ -4,13 +4,22 @@ const nextConfig = {
     typedRoutes: false,
   },
   images: {
-    domains: ['res.cloudinary.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
+    ],
+    minimumCacheTTL: 60,
+    dangerouslyAllowSVG: true,
   },
   webpack: (config, { dev }) => {
     if (dev) {
-      config.ignoreWarnings = [
-        { module: /node_modules/, message: /NODE_TLS_REJECT_UNAUTHORIZED/ },
-      ];
+      config.watchOptions = {
+        ...config.watchOptions,
+        poll: 1000,
+      };
     }
     return config;
   },
