@@ -35,7 +35,16 @@ export default function RootLayout({
               {children}
             </main>
             <Navbar />
-            <Toaster position="top-right" />
+            <Toaster 
+              position="top-center"  // Changed from "top-right" to "top-center"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: '#333',
+                  color: '#fff',
+                },
+              }}
+            />
           </ClientProvider>
         </AuthProvider>
       </body>
